@@ -1,0 +1,33 @@
+version: '3'
+networks:
+  internal:
+services:
+  timescaledb:
+    hostname: timescale
+    image: timescale/timescaledb:0.11.0-pg10
+    environment:
+      POSTGRES_USER: asset_ms
+      POSTGRES_PASSWORD: demo_password
+    networks:
+      internal:
+        aliases:
+          - timescale
+    expose:
+      - 5432
+    ports:
+      - 55435:5432
+  trending-asset-ms:
+    image: trending-asset-ms:test
+    environment:
+      DB_USER: asset_ms
+      DB_PASSWORD: demo_password
+      DB_HOST: timescale
+      DB_PORT: 5432
+    expose:
+      - 8080
+    ports:
+      - 8080:8080
+    networks:
+      internal:
+        aliases:
+          - internal
