@@ -1,16 +1,15 @@
-import express from 'express';
-import {Sequelize, DataTypes} from 'sequelize';
+import express, {Request, Response} from 'express';
+import {Sequelize} from 'sequelize';
 import dotenv from 'dotenv';
+import redis, {RedisClient} from 'redis';
 import {AssetSearch, RecentSearchesResponse, TrendingSearchesResponse} from "./search";
+import {SearchCache} from "./search.cache";
 
 if (process.env.NODE_ENV !== 'production') {
     dotenv.config();
 }
-
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded());
-const port = 8080;
+const redisClient: RedisClient = redis.createClient();
+const cache: SearchCache = new SearchCache(redisClient);
 
 const sequelize: Sequelize = new Sequelize(
     `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/trending_asset_ms`,
@@ -20,6 +19,11 @@ const sequelize: Sequelize = new Sequelize(
     }
 );
 
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded());
+const port = 8080;
+
 sequelize.authenticate().then(() => {
     console.log('Connection has been established successfully.');
 }).catch(err => {
@@ -28,10 +32,11 @@ sequelize.authenticate().then(() => {
 
 const search: AssetSearch = new AssetSearch(sequelize);
 
-app.post('/log', async (req, res) => {
+app.post('/log', async (req: Request, res: Response) => {
     const {userId, assetId} = req.body;
     try {
         await search.logSearch(userId, assetId);
+        await cache.logAssetSearch(assetId, userId);
         return res.status(200).send();
     } catch (err) {
         console.error('Could not save search');
@@ -41,8 +46,10 @@ app.post('/log', async (req, res) => {
 
 app.get('/trending', async (req, res) => {
     try {
-        const trendingSearchesResponse: TrendingSearchesResponse = await search.getTrendingSearches();
-        return res.status(200).send(trendingSearchesResponse);
+        //const trendingSearchesResponse: TrendingSearchesResponse = await search.getTrendingSearches();
+        const assetIds = await cache.getTrending();
+        return res.status(200).send({assetIds});
+        //return res.status(200).send(trendingSearchesResponse);
     } catch (err) {
         console.error('Could not retrieve trending assets.');
         return res.status(500).send({message: 'Could not retrieve trending assets'})
@@ -55,7 +62,7 @@ app.get('/user/:id/recent', async (req, res) => {
     let userId: number;
     let num = Number(id);
     if (!isNaN(num)) {
-        userId = Number(req.params.id);
+        userId = Number(id);
     } else {
         return res.status(400).send({message: "Invalid userId. Must be a number"})
     }

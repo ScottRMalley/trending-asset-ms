@@ -1,5 +1,6 @@
 import {Sequelize} from "sequelize";
 import {initModels, SearchLog} from "./models/SearchLog";
+import {RedisClient} from "redis";
 
 export interface TrendingSearchesResponse {
     assetIds: number[];

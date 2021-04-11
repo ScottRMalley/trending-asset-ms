@@ -17,7 +17,7 @@ services:
     ports:
       - 55435:5432
   trending-asset-ms:
-    image: trending-asset-ms:test
+    image: trending-asset-ms:latest
     environment:
       DB_USER: asset_ms
       DB_PASSWORD: demo_password
