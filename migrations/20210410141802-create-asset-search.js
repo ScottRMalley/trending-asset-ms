@@ -2,17 +2,21 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('asset_searches', {
-      time: {
+      logTime: {
         type: Sequelize.DATE,
-        allowNull: false
+        allowNull: false,
+        field: 'log_time',
+        primaryKey: true,
       },
-      user: {
+      userId: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
+        field: 'user_id',
+        primaryKey: true,
       },
       asset: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: false
       }
     });
   },

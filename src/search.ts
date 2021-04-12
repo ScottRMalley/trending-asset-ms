@@ -1,6 +1,5 @@
 import {Sequelize} from "sequelize";
 import {initModels, SearchLog} from "./models/SearchLog";
-import {RedisClient} from "redis";
 
 export interface TrendingSearchesResponse {
     assetIds: number[];
@@ -28,33 +27,40 @@ export class AssetSearch implements Search {
 
     async logSearch(userId: number, assetId: number): Promise<void> {
         await SearchLog.create({
-            time: Sequelize.fn('NOW'),
-            user: userId,
+            logTime: Sequelize.fn('NOW'),
+            userId: userId,
             asset: assetId,
+        }, {
+            logging: false
         });
     }
 
     async getTrendingSearches(): Promise<TrendingSearchesResponse> {
         const [assets, metadata] = await this.sequelize.query(`
-            SELECT asset, COUNT(DISTINCT "user")
+            SELECT asset, COUNT(DISTINCT user_id)
             FROM asset_searches
-            WHERE "time" BETWEEN NOW() - INTERVAL '24 h' AND NOW()
+            WHERE log_time BETWEEN NOW() - INTERVAL '24 h' AND NOW()
             GROUP BY asset
             ORDER BY count desc
             LIMIT 100;
-        `);
+        `, {
+            logging: false
+        });
         return {assetIds: assets.map((result: any) => result.asset)};
     }
 
     async getRecentSearches(userId: number): Promise<RecentSearchesResponse> {
         const [assets, metadata] = await this.sequelize.query(`
-            SELECT DISTINCT(asset), MAX("time")
+            SELECT DISTINCT(asset), MAX(log_time)
             FROM asset_searches
-            WHERE "user" = ${userId}
+            WHERE user_id = ?
             GROUP BY asset
             ORDER BY 2 DESC
             LIMIT 100;
-        `);
+        `, {
+            replacements: [userId],
+            logging: false
+        });
         return {assetIds: assets.map((result: any) => result.asset)}
     }
 }

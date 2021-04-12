@@ -39,7 +39,7 @@ app.post('/log', async (req: Request, res: Response) => {
     }
 });
 
-app.get('/trending', async (req, res) => {
+app.get('/trending', async (req: Request, res: Response) => {
     try {
         const trendingSearchesResponse: TrendingSearchesResponse = await search.getTrendingSearches();
         return res.status(200).send(trendingSearchesResponse);
@@ -50,7 +50,7 @@ app.get('/trending', async (req, res) => {
 
 });
 
-app.get('/user/:id/recent', async (req, res) => {
+app.get('/user/:id/recent', async (req: Request, res: Response) => {
     const {id} = req.params;
     let userId: number;
     let num = Number(id);

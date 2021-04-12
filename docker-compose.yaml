@@ -4,7 +4,7 @@ networks:
 services:
   timescaledb:
     hostname: timescale
-    image: timescale/timescaledb:0.11.0-pg10
+    image: timescale/timescaledb:latest-pg12
     environment:
       POSTGRES_USER: asset_ms
       POSTGRES_PASSWORD: demo_password
@@ -17,7 +17,7 @@ services:
     ports:
       - 55435:5432
   trending-asset-ms:
-    image: trending-asset-ms:latest
+    image: trending-asset-ms:0.0.0
     environment:
       DB_USER: asset_ms
       DB_PASSWORD: demo_password
@@ -31,4 +31,4 @@ services:
     networks:
       internal:
         aliases:
-          - internal
+          - assetms

@@ -8,13 +8,16 @@ class SearchLog extends Model {
 
 const initModels = (sequelize: Sequelize): Model => {
     const attributes = {
-        time: {
+        logTime: {
             type: DataTypes.DATE,
+            allowNull: false,
+            field: 'log_time',
             primaryKey: true,
         },
-        user: {
+        userId: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            field: 'user_id',
             primaryKey: true,
         },
         asset: {
