@@ -163,6 +163,6 @@ only takes into account unique users in the last 24 hours. When binning data, a 
 have been unique in that one time bin, but that does not mean it would be unique in a 24 hour time span, thus we cannot
 simply sum up our time buckets.
 
-Personally, I am still convinced that there is a way to use Continuous Aggregates to boost our performance, but I
-couldn't figure it out within the scope of this challenge. 
+Personally, I am still convinced that there is some potential to use Continuous Aggregates to boost our performance, 
+but more investigation/design would need to be done into constructing the right binning format.
 
